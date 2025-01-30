@@ -1,5 +1,11 @@
+const buttons=document.querySelectorAll('button');
+const displayCalculation=document.getElementById('displayContent');
 
-let result=0;
+let currentOperand='';
+let previousOperand='';
+let operator=null;
+
+
 
 
 function add(a, b){
@@ -12,27 +18,80 @@ function multiply(a, b){
     return a*b;
 }
 function divide(a, b){
-    return (b? Infinity: a/b);
+    return (b==0? 'Error': a/b);
 }
 
 function operate(){
-    let operator=window.prompt('Enter the operator : ');
-    let firstNumber=parseInt(window.prompt('Enter First Number : '));
-    let secondNumber=parseInt(window.prompt('Enter Second Number : '));
+    let prev=parseFloat(previousOperand);
+    let curr=parseFloat(currentOperand);
+
+    if(isNaN(prev) || isNaN(curr)) return '';
+
     switch(operator)
     {
         case '+':
-            result=add(firstNumber, secondNumber);
-            break;
+            return add(prev, curr);
         case '-':
-            result=subtract(firstNumber, secondNumber);
-            break;
+            return subtract(prev, curr);
         case '*':
-            result=multiply(firstNumber, secondNumber);
-            break;
+            return multiply(prev, curr);
         case '/':
-            result=divide(firstNumber, secondNumber);
-            break;
+            return divide(prev, curr);
+        default:
+            return '';
     }
+
 }
-operate();
+
+
+function populateDisplay(clickedItem){
+
+    if(!isNaN(clickedItem) || clickedItem === '.'){
+        if(clickedItem === '.' && currentOperand.includes('.')) return;
+        currentOperand+=clickedItem;
+    }
+    else if(['+', '-', '*', '/'].includes(clickedItem)){
+        if(previousOperand === '' && currentOperand ==='') return;
+        if(previousOperand !== '' && currentOperand !==''){
+            previousOperand=operate().toString();
+            currentOperand='';
+        }
+        else{
+            previousOperand=currentOperand;
+            currentOperand='';
+        }
+        operator=clickedItem;
+    }
+    else if (clickedItem === '='){
+        if(operator && previousOperand !== '' && currentOperand !==''){
+            currentOperand=operate().toString();
+            previousOperand='';
+            operate=null;
+        }
+    }
+    else if(clickedItem === 'AC'){
+        currentOperand='';
+        previousOperand='';
+        operate=null;
+    }
+    else if(clickedItem === '<='){
+        currentOperand=currentOperand.slice(0, -1);
+    }
+    else if(clickedItem === '%'){
+        if( currentOperand !=='')
+            currentOperand=(parseFloat(currentOperand/100.0)).toString();
+    }
+
+
+    displayCalculation.textContent=currentOperand || previousOperand || '0';
+}
+
+buttons.forEach((button)=>{
+    button.addEventListener('click',()=>{
+        populateDisplay(button.textContent);
+        console.log('button pressed ');
+      });
+});
+
+
+displayCalculation.textContent='0';
